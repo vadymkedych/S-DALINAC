@@ -51,50 +51,28 @@ B1EventAction::~B1EventAction()
 
 void B1EventAction::BeginOfEventAction(const G4Event* event)
 {    
-//       G4int eventNb = event->GetEventID();
-/* 
-    G4cout << "\n---> Begin of event: " << eventNb << G4endl;*/
+    //   G4int eventNb = event->GetEventID(); 
+    // G4cout << "Begin of event: " << eventNb << G4endl;
 
-  
-    fEventParticles.clear();
-    fEventParticlesTime.clear();
-    fEventProcess.clear();
-  
-    fXAfterFoil     = 100*cm;
-    fYAfterFoil     = 100*cm;
-    fXDetectorHit   = 100*cm;
-    fYDetectorHit   = 100*cm;
+    fXAfterFoil     = -20*cm;
+    fYAfterFoil     = -20*cm;
+    fXDetectorHit   = -20*cm;
+    fYDetectorHit   = -20*cm;
     
     fScattered      = false;
+    // G4cout << "Begin of Event Action" << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void B1EventAction::EndOfEventAction(const G4Event*)
 {   
-  // accumulate statistics in run action
-//   fRunAction->SetDetectedParticles(fEventParticles);
-//   fRunAction->SetParticlesTime(fEventParticlesTime);
-//   fRunAction->SetDetectedProcesses(fEventProcess);
-  
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
     
     analysisManager->FillH2(0, fXAfterFoil / mm, fYAfterFoil / mm);
 //     if(!fScattered)
     analysisManager->FillH2(1, fXDetectorHit / mm, fYDetectorHit / mm);
 }
-
-// void B1EventAction::AddParticle(G4String name){
-//         fEventParticles[name] += 1;
-// }
-// 
-// void B1EventAction::AddParticleTime(G4String name, G4double time){
-//     fEventParticlesTime[name].push_back(time);
-// }
-// 
-// void B1EventAction::AddProcess(G4String name){
-//         fEventProcess[name] += 1;
-// }
 
 void B1EventAction::SetAfterFoilPosition(G4ThreeVector position){
     fXAfterFoil = position.getX();

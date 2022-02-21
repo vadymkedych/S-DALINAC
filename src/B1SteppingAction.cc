@@ -57,24 +57,19 @@ B1SteppingAction::~B1SteppingAction()
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step)
 {
-  if (!fScoringVolume || !fAirVolume || !fFoilVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
+    if (!fScoringVolume || !fAirVolume || !fFoilVolume) { 
+      const B1DetectorConstruction* detectorConstruction
+        = static_cast<const B1DetectorConstruction*>
         (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume  = detectorConstruction->GetScoringVolume();
-    fAirVolume      = detectorConstruction->GetAirVolume();
-    fFoilVolume     = detectorConstruction->GetFoilVolume();
-  }
-
-  // get volume of the current step
-//   G4LogicalVolume* preStepVolume 
-//     = step->GetPreStepPoint()->GetTouchableHandle()
-//       ->GetVolume()->GetLogicalVolume();
-//       
-//       
+      fScoringVolume  = detectorConstruction->GetScoringVolume();
+      fAirVolume      = detectorConstruction->GetAirVolume();
+      fFoilVolume     = detectorConstruction->GetFoilVolume();
+    }
+         
     G4Track* track = step->GetTrack();
-    if(track->GetTrackID() > 1)
-       track->SetTrackStatus(fStopAndKill);
+
+    if(!track->GetNextVolume())
+      return;
           
     G4LogicalVolume* preStepVolume 
         = step->GetPreStepPoint()->GetTouchableHandle()
@@ -83,29 +78,13 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
     G4LogicalVolume* postStepVolume 
         = step->GetPostStepPoint()->GetTouchableHandle()
       ->GetVolume()->GetLogicalVolume();
-      
-//     G4cout << "Pre volume name: " <<  preStepVolume->GetName() << G4endl;
-//     G4cout << "Post volume name: " <<  postStepVolume->GetName() << G4endl;
-//     
-//     G4cout << "Pre position: " << step->GetPreStepPoint()->GetPosition().getX() / cm << " " << step->GetPreStepPoint()->GetPosition().getY() / cm << " " << step->GetPreStepPoint()->GetPosition().getZ() / cm << G4endl;
-//     G4cout << "Post position: " << step->GetPostStepPoint()->GetPosition().getX() / cm << " " << step->GetPostStepPoint()->GetPosition().getY() / cm << " " << step->GetPostStepPoint()->GetPosition().getZ() / cm << G4endl;
-//     G4cout << "Energy: " << G4BestUnit(track->GetKineticEnergy(), "Energy") << G4endl;
-    
-    if(preStepVolume->GetName() == "Detector" && postStepVolume->GetName() == "World"){    
-        track->SetTrackStatus(fStopAndKill);
-    }
-    
-    if(!track->GetNextVolume() ||  step->GetPostStepPoint()->GetPosition().getZ() / cm > 42)
-        track->SetTrackStatus(fStopAndKill);
-    
-    if(preStepVolume->GetName() == "Metal" && postStepVolume->GetName() == "World")
-        fEventAction->SetAfterFoilPosition(step->GetPostStepPoint()->GetPosition());
-    
-    if(preStepVolume->GetName() == "World" && postStepVolume->GetName() == "Detector")
-        fEventAction->SetDetectorHitPosition(step->GetPostStepPoint()->GetPosition());
+
+    if(preStepVolume == fFoilVolume && postStepVolume == fAirVolume)
+      fEventAction->SetAfterFoilPosition(step->GetPostStepPoint()->GetPosition());
+
+    if(preStepVolume == fAirVolume && postStepVolume == fScoringVolume)
+      fEventAction->SetDetectorHitPosition(step->GetPostStepPoint()->GetPosition());
 }
-
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

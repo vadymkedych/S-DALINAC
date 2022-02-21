@@ -41,8 +41,6 @@
 #include "G4SystemOfUnits.hh"
 #include "Analysis.hh"
 
-#include <fstream>
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1RunAction::B1RunAction()
@@ -58,11 +56,7 @@ B1RunAction::~B1RunAction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void B1RunAction::BeginOfRunAction(const G4Run*)
-{ 
-    fdetectedParticles.clear();
-    fParticlesTime.clear();
-    fDetectedProcesses.clear();
-    
+{   
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
     analysisManager->SetVerboseLevel(1);
     analysisManager->OpenFile("outpoot.root");
@@ -75,45 +69,8 @@ void B1RunAction::BeginOfRunAction(const G4Run*)
 
 void B1RunAction::EndOfRunAction(const G4Run* run)
 {
-  G4int nofEvents = run->GetNumberOfEvent();
-  if (nofEvents == 0) return;
-
-//   Run conditions
-//    note: There is no primary generator action object for "master"
-//          run manager for multi-threaded mode.
-//   G4cout<< G4endl << "================RESULTS================" << G4endl;
-//   G4cout <<"Number of unique Particles: " << fdetectedParticles.size() <<G4endl;
-//   
-//   for(auto& [key, value] : fdetectedParticles){
-//         G4cout << key << " : " << value << G4endl;
-//     }
-//     
-//   G4cout <<"Detected processes: " << fDetectedProcesses.size() <<G4endl;  
-//   for(auto& [key, value] : fDetectedProcesses){
-//         G4cout << key << " : " << value << G4endl;
-//     }
-//   G4cout <<"Global Time for gamma: " << fParticlesTime["gamma"].size() <<G4endl;
-//     for(auto item : fParticlesTime["gamma"]){
-//         G4cout << item << G4endl;
-//     }
-//   G4cout<< G4endl << "=======================================" << G4endl;
-//   
-//   Write to files
-//   G4String path = "/outputFiles/";
-//   G4String fileName = "";
-//   
-//   for(auto& [key, timeVector] : fParticlesTime){
-//     fileName = key + ".txt";
-//     std::ofstream file;         
-//     file.open(fileName);
-//     if(file.is_open()){
-//         for(auto i  : timeVector) {
-//           file << i << std::endl;
-//         }
-//         
-//         file.close();
-//     } else std::cout << "Can't open file" << std::endl;
-//   }
+    G4int nofEvents = run->GetNumberOfEvent();
+    if (nofEvents == 0) return;
   
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
     analysisManager->Write();
@@ -122,26 +79,3 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-
-void B1RunAction::SetDetectedParticles(std::map <G4String, G4int> detectedParticles) {
-    for(auto& [key, value] : detectedParticles){
-        fdetectedParticles[key] += value;
-    }
-}
-
-void B1RunAction::SetParticlesTime(std::map <G4String, std::vector<G4double>> particlesTime) {
-    for(auto& [key, timeVector] : particlesTime){
-        fParticlesTime[key].insert(fParticlesTime[key].end(), timeVector.begin(), timeVector.end());
-    }
-}
-
-void B1RunAction::SetDetectedProcesses(std::map <G4String, G4int> detectedProcesses) {
-    for(auto& [key, value] : detectedProcesses){
-            fDetectedProcesses[key] += value;
-    }
-}
-
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
